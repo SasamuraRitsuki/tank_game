@@ -62,12 +62,16 @@ private:
 	const int ENEMY1_ANGLE = 270;
 	//敵2と3の初期向き
 	const int ENEMY2_ANGLE = 180;
+	//白い背景の画像の透明度
+	const int BACK_GFX_ALPHA = 125;
 
 	//ゲームスタートのフラグ
 	bool start_ = false;
 	//リザルトを呼び出すフラグ
 	bool result_start_ = false;
 
+	//後ろの白い背景の画像パス
+	int back_gfx_;
 	//bgmの音楽パス
 	int bgm_snd_;
 	//ダメージの音楽パス

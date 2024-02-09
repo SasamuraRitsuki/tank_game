@@ -19,8 +19,8 @@ private:
 	//エンターの座標
 	const tnl::Vector2i CLICK_TEXT_POS = { 345,460 };
 	//テキストのカラーコード
-	//const int TEXT_COLOR = 0x505050;
-	const int TEXT_COLOR = 0;
+	const int TEXT_COLOR = 0xffd700;
+	//const int TEXT_COLOR = 0;
 
 	//経過時間
 	float timeleft_ = 0;

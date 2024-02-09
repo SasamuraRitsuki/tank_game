@@ -19,8 +19,8 @@ ScenePlay::ScenePlay() {
 
 	//“G‚Ì¶¬
 	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY1_POS, ENEMY1_ANGLE));
-	//enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY2_POS, ENEMY2_ANGLE));
-	//enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY3_POS, ENEMY2_ANGLE));
+	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY2_POS, ENEMY2_ANGLE));
+	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY3_POS, ENEMY2_ANGLE));
 
 	SetDefaultLightParameter("directional_light_parameter.bin");
 
@@ -30,6 +30,9 @@ ScenePlay::ScenePlay() {
 
 	skybox_->rot_ = tnl::Quaternion::RotationAxis({ 0, 1, 0 }, tnl::ToRadian(90));
 	
+	//‰æ‘œ‚ğ“Ç‚İ‚Ş
+	//back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/white.bmp");
+	back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/black2.jpg");
 	//‰¹Šy‚ğ“Ç‚İ‚Ş
 	bgm_snd_ = ResourceManager::GetInstance()->loadSound("sound/bgm/battle_bgm.mp3");
 	damage_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/damage_se.mp3");
@@ -40,7 +43,7 @@ ScenePlay::ScenePlay() {
 }
 
 ScenePlay::~ScenePlay() {
-	StopSoundMem(bgm_snd_);
+
 }
 
 void ScenePlay::update(float delta_time) {
@@ -136,12 +139,14 @@ void ScenePlay::update(float delta_time) {
 		/*auto mgr = GM::GetInstance();
 			mgr->changeScene(std::make_shared<SceneResult>(cleared_));*/
 
+		//1“x‚¾‚¯s‚í‚ê‚éˆ—
 		if (!result_start_) {
 			result_start_ = true;
 
+			StopSoundMem(bgm_snd_);
 			result_ = std::make_shared<SceneResult>(cleared_);
 		}
-
+		//Œ‹‰Ê‰æ–Ê‚Ìupdate
 		result_->update(delta_time);
 	}
 
@@ -162,6 +167,12 @@ void ScenePlay::draw() {
 	tank_->draw(camera_);
 
 	if (result_start_) {
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, BACK_GFX_ALPHA);
+		//Œã‚ë‚Ì”’‚¢”–‚¢”wŒi
+		DrawExtendGraph(0, 0,
+			DXE_WINDOW_WIDTH, DXE_WINDOW_HEIGHT, back_gfx_, false);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		//Œ‹‰Ê‰æ–Ê‚Ìdraw
 		result_->draw();
 	}
 }
