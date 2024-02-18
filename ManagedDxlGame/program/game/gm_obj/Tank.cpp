@@ -39,6 +39,7 @@ Tank::Tank() {
 	hp_back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/black2.jpg");
 	spin_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/yellow1.jpg");
 	back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/white.bmp");
+	bullet_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/bullet.png");
 	//âπäyÇì«Ç›çûÇﬁ
 	damage_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/damage_se.mp3");
 	rolling_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/rolling.mp3");
@@ -54,7 +55,7 @@ Tank::~Tank() {
 }
 
 void Tank::update(float delta_time) {
-	
+		
 	auto scene_play = std::dynamic_pointer_cast<ScenePlay>(GM::GetInstance()->getSceneInstance());
 
 	//--------------------------------------ìÆÇ≠è∞Ç…èÊÇ¡ÇΩéûÇÃèàóù-------------------------------------------------------
@@ -199,7 +200,7 @@ void Tank::update(float delta_time) {
 
 	auto it = bullet.begin();
 
-	int blt_count = 0;
+	blt_count_ = 0;
 	while (it != bullet.end()) {
 		
 		(*it)->update(delta_time);
@@ -213,9 +214,9 @@ void Tank::update(float delta_time) {
 
 			// íeÇ∆ìGÇÃìñÇΩÇËîªíËÇÃèàóù
 			if (TryEnemyCollision((*it), enemy_pos, enemy_size)) {
-				scene_play->enemy_it_->get()->hp_calc_ = true;
-				//ìGÇ™hp0ÇÃéûÇ…ìñÇΩÇ¡ÇΩÇÁ
+				//ìGÇ™hp0à»è„ÇÃéûÇ…ìñÇΩÇ¡ÇΩÇÁ
 				if (scene_play->enemy_it_->get()->tank_hp_ > 0) {
+					scene_play->enemy_it_->get()->damaged_moment_ = true;
 					scene_play->enemy_it_->get()->tank_hp_--;
 					//å¯â âπ
 					PlaySoundMem(damage_snd_, DX_PLAYTYPE_BACK);
@@ -223,13 +224,13 @@ void Tank::update(float delta_time) {
 				is_alive_bullet_ = true;
 			}
 		}
-		if (blt_count >= BULLET_MAX) {
+		if (blt_count_ >= BULLET_MAX) {
 			StopSoundMem(shot_snd_);
 		}
 		if (
 			//TryTargetCollision(*it) ||
 			is_alive_bullet_||				//ìGÇ…íeÇ™ìñÇΩÇ¡ÇΩÇÁ
-			blt_count >= BULLET_MAX ||		//íeÇÃç≈ëÂílÇí¥Ç¶ÇΩÇÁ
+			blt_count_ >= BULLET_MAX ||		//íeÇÃç≈ëÂílÇí¥Ç¶ÇΩÇÁ
 			TryWallCollision(*it) ||		//ï«Ç…ìñÇΩÇ¡ÇΩÇÁ
 			scene_play->tank_damged_){		//É_ÉÅÅ[ÉWÇêHÇÁÇ¡ÇΩÇÁ(éÄÇÒÇ≈ñﬂÇ≥ÇÍÇΩÇ∆Ç´Ç…ÉNÉäÉAÇµÇΩÇÁâΩÇ©ïœÇæÇ©ÇÁ)
 			it = bullet.erase(it);
@@ -237,8 +238,9 @@ void Tank::update(float delta_time) {
 			continue;
 		}
 		it++;
-		blt_count++;
+		blt_count_++;
 	}
+	DrawGraph(0,0,bullet_gfx_,true);
 	//--------------------------------------hpÉoÅ[ÇÃèàóù------------------------------------------------
 	if (hp_calc_) {
 		hp_elapsed_ += delta_time;
@@ -273,12 +275,22 @@ void Tank::update(float delta_time) {
 
 void Tank::draw(Shared<dxe::Camera> camera) {
 
+	//íeÇÃï`âÊ
+	mesh_->render(camera);
+	for (auto blt : bullet) {
+		blt->draw(camera);
+	}
+
 	spin_bar_right_ = 0.5f * rolling_elapsed_*(DXE_WINDOW_WIDTH / (3 * ROLLING_TIME)) + spin_gauge_pos_.x;
 
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
 	//å„ÇÎÇÃîíÇ¢îñÇ¢îwåi
-	DrawExtendGraph(BACK_POS_FIRST.x, BACK_POS_FIRST.y,
-		BACK_POS_LAST.x, BACK_POS_LAST.y, back_gfx_, false);
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+	//è„
+	DrawExtendGraph(UP_BACK_POS_FIRST.x, UP_BACK_POS_FIRST.y,
+		UP_BACK_POS_LAST.x, UP_BACK_POS_LAST.y, back_gfx_, false);
+	//â∫
+	DrawExtendGraph(DOWN_BACK_POS_FIRST.x, DOWN_BACK_POS_FIRST.y,
+		DOWN_BACK_POS_LAST.x, DOWN_BACK_POS_LAST.y, back_gfx_, false);
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND,255);
 
 	//îwåiÇÃçïÇ¢ÉoÅ[
@@ -300,6 +312,12 @@ void Tank::draw(Shared<dxe::Camera> camera) {
 	DrawStringEx(SPIN_TEXT_POS.x, SPIN_TEXT_POS.y, TEXT_COLOR, "SPIN");
 	DrawStringEx(SPIN_CLICK_TEXT_POS.x, SPIN_CLICK_TEXT_POS.y, TEXT_COLOR, "âEÉNÉäÉbÉN");
 
+	int blt_remains = BULLET_MAX - blt_count_;
+	for (int i = 0; i < blt_remains;i++) {
+		//DrawGraph(i * 64, 0, bullet_gfx_, true);
+		DrawRotaGraph(BULLET_POS.x + i * 64, BULLET_POS.y, BULLET_POS.z,0,bullet_gfx_, true);
+	}
+
 	//DrawStringEx(500, 100, 0x0000ff, "posx = %.2f", tank_pos_.x);
 	//DrawStringEx(500, 200, 0x0000ff, "posz = %.2f", tank_pos_.z);
 
@@ -317,11 +335,6 @@ void Tank::draw(Shared<dxe::Camera> camera) {
 	/*DrawStringEx(SPIN_CLICK_TEXT_POS.x, SPIN_CLICK_TEXT_POS.y - 100, TEXT_COLOR, "ÇÕÇ¢");
 	DrawStringEx(SPIN_CLICK_TEXT_POS.x, SPIN_CLICK_TEXT_POS.y - 200, TEXT_COLOR, "%f",tank_pos_.y);*/
 
-	//íeÇÃï`âÊ
-	mesh_->render(camera);
-	for (auto blt : bullet) {
-		blt->draw(camera);
-	}
 }
 
 void Tank::DirChange(int dir) {

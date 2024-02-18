@@ -50,8 +50,7 @@ Enemy::Enemy(const tnl::Vector3& spawn_pos, const int& dir_angle) {
 }
 
 Enemy::~Enemy() {
-	//効果音
-	PlaySoundMem(dead_snd_, DX_PLAYTYPE_BACK);
+
 }
 
 void Enemy::update(float delta_time) {
@@ -155,6 +154,14 @@ void Enemy::update(float delta_time) {
 	}
 
 	//--------------------------------------hpバーの処理------------------------------------------------
+	if (damaged_moment_ && tank_hp_ >= 0) {
+		hp_calc_ = true;
+		//hpバーが減る基準点を現在のhpバーの右端に変更
+		hp_bar_start_right = hp_bar_length_;
+		hp_elapsed_ = 0;
+		damaged_moment_ = false;
+	}
+	
 	if (hp_calc_) {
 		hp_elapsed_ += delta_time;
 	}
@@ -162,6 +169,8 @@ void Enemy::update(float delta_time) {
 	//hpが減り切ったら死亡
 	if (hp_bar_right_ <= screen_hp_bar_pos_.x) {
 		dead_ = true;
+		//効果音
+		PlaySoundMem(dead_snd_, DX_PLAYTYPE_BACK);
 	}
 
 }
@@ -176,16 +185,24 @@ void Enemy::draw(Shared<dxe::Camera> camera) {
 		, camera->view_
 		, camera->proj_);
 
-	int next_hp_bar_length = HP_BAR_MAX - ((tank_hp_ - TANK_HP) * -(HP_BAR_MAX / TANK_HP));
+	//int next_hp_bar_length = HP_BAR_MAX - ((tank_hp_ - TANK_HP) * -(HP_BAR_MAX / TANK_HP));
 
-	//hpの減り方に工夫
-	hp_bar_length_ = tnl::SmoothLerp(hp_bar_length_, next_hp_bar_length, HP_ELAPSED_LIMIT, hp_elapsed_, 0);
+	////hpの減り方に工夫
+	//hp_bar_length_ = tnl::SmoothLerp(hp_bar_length_, next_hp_bar_length, HP_ELAPSED_LIMIT, hp_elapsed_, 0);
 
+	//hp_bar_right_ = screen_hp_bar_pos_.x + hp_bar_length_;
+	if (!damaged_moment_) {
+		int next_hp_bar_length = HP_BAR_MAX - ((tank_hp_ - TANK_HP) * -(HP_BAR_MAX / TANK_HP));
+
+		//hpの減り方に工夫
+		hp_bar_length_ = tnl::SmoothLerp(hp_bar_start_right, next_hp_bar_length, HP_ELAPSED_LIMIT, hp_elapsed_, 0);
+	}
 	hp_bar_right_ = screen_hp_bar_pos_.x + hp_bar_length_;
+
+	hp_elapsed_ = (hp_elapsed_ >= HP_ELAPSED_LIMIT) ? HP_ELAPSED_LIMIT : hp_elapsed_;
 
 	if (hp_elapsed_ >= HP_ELAPSED_LIMIT) {
 		hp_calc_ = false;
-		hp_elapsed_ = 0;
 	}
 	//背景の黒いバー
 	DrawExtendGraph(screen_hp_bar_pos_.x, screen_hp_bar_pos_.y,
@@ -193,7 +210,6 @@ void Enemy::draw(Shared<dxe::Camera> camera) {
 	//緑バー
 	DrawExtendGraph(screen_hp_bar_pos_.x, screen_hp_bar_pos_.y,
 		hp_bar_right_, screen_hp_bar_pos_.y + 10, hp_gfx_, false);
-
 
 	mesh_->render(camera);
 	for (auto blt : bullet) {

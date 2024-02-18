@@ -3,9 +3,12 @@
 #include "../dxlib_ext/dxlib_ext.h"
 #include "gm_manager.h"
 #include "Scene_base.h"
+#include "resource_manager.h"
 
 GM::GM(std::shared_ptr<SceneBase> start_scene):now_scene_(start_scene) {
-
+	//始めに重いbgmデータをロードしておく
+	int a = ResourceManager::GetInstance()->loadSound("sound/bgm/battle_bgm.mp3");
+	int b = ResourceManager::GetInstance()->loadSound("sound/bgm/menu_bgm.mp3");
 }
 
 GM::~GM() {

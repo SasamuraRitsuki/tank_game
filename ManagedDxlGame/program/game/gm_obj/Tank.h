@@ -54,6 +54,8 @@ private:
 	//const tnl::Vector3 FIRST_POS = { 0,50,2000 };
 	//tankの形
 	const tnl::Vector3 TANK_FORM = { 1.0f, 0.75f, 1.0f };
+	//弾の画像の位置と大きさ
+	const tnl::Vector3 BULLET_POS = { 32, 50, 0.8f };
 	//HPのゲージ位置
 	const tnl::Vector2i hp_gauge_pos_ = { DXE_WINDOW_WIDTH / 3 ,DXE_WINDOW_HEIGHT * 4 / 5 };
 	//スピンゲージ位置
@@ -62,10 +64,14 @@ private:
 	const tnl::Vector2i HP_TEXT_POS = { hp_gauge_pos_.x - 90, hp_gauge_pos_.y };
 	const tnl::Vector2i SPIN_TEXT_POS = { spin_gauge_pos_.x - 150, spin_gauge_pos_.y - 5 };
 	const tnl::Vector2i SPIN_CLICK_TEXT_POS = { SPIN_TEXT_POS.x + 600, SPIN_TEXT_POS.y };
-	//後ろの白い背景の位置の左上の位置
-	const tnl::Vector2i BACK_POS_FIRST = { 140,hp_gauge_pos_.y - 20 };
-	//後ろの白い背景の位置の右下の位置
-	const tnl::Vector2i BACK_POS_LAST = { DXE_WINDOW_WIDTH - 140,spin_gauge_pos_.y + 60 };
+	//下の白い背景の位置の左上の位置
+	const tnl::Vector2i DOWN_BACK_POS_FIRST = { 140,hp_gauge_pos_.y - 20 };
+	//下の白い背景の位置の右下の位置
+	const tnl::Vector2i DOWN_BACK_POS_LAST = { DXE_WINDOW_WIDTH - 140,spin_gauge_pos_.y + 60 };
+	//上の白い背景の位置の左上の位置
+	const tnl::Vector2i UP_BACK_POS_FIRST = { 0,0 };
+	//上の白い背景の位置の右下の位置
+	const tnl::Vector2i UP_BACK_POS_LAST = { 64 * 5,104 };
 	//初期HP
 	const int TANK_HP = 3;
 	//移動量
@@ -100,6 +106,7 @@ private:
 	tnl::Vector3 mouse_pos_;
 	//マウスへの角度
 	int angle_to_mouse_;
+	int blt_count_ = 0;
 	//弾の生存
 	bool is_alive_bullet_ = false;
 	//回転の経過時間
@@ -142,6 +149,8 @@ private:
 	int hp_back_gfx_;
 	//後ろの白い背景の画像パス
 	int back_gfx_;
+	//弾の画像パス
+	int bullet_gfx_;
 	//ダメージの音楽パス
 	int damage_snd_;
 	//回転の音楽パス

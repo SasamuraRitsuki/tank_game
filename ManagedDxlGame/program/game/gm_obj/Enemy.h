@@ -25,8 +25,8 @@ public:
 	int tank_hp_;
 	//弾の生存
 	bool is_alive_bullet_ = false;
-	//hp計算中
-	bool hp_calc_ = false;
+	//ダメージを受けた瞬間
+	bool damaged_moment_ = false;
 	//死亡判定
 	bool dead_ = false;
 
@@ -70,7 +70,7 @@ private:
 	//HPバーの長さ
 	const int HP_BAR_MAX = 60;
 	//hpが減りきる時間
-	const int HP_ELAPSED_LIMIT = 1;
+	const float HP_ELAPSED_LIMIT = 0.25f;
 
 
 	//戦車への距離
@@ -101,6 +101,10 @@ private:
 	bool move_stop_ = false;
 	//hpバーの長さ
 	float hp_bar_length_ = HP_BAR_MAX;
+	//hpバーの右端の始動位置
+	float hp_bar_start_right = HP_BAR_MAX;
+	//hp計算中
+	bool hp_calc_ = false;
 	//弾を撃つまでの秒数
 	float shot_count_;
 

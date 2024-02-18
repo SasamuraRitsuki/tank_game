@@ -31,4 +31,6 @@ private:
 
 	//ゲームクリアの効果音
 	int clear_snd_;
+	//ゲームオーバーの効果音
+	int failure_snd_;
 };

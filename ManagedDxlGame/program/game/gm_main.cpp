@@ -29,7 +29,7 @@ void gameMain(float delta_time) {
 	GM::GetInstance()->update(delta_time);
 
 
-	DrawFpsIndicator({ 10, DXE_WINDOW_HEIGHT - 10, 0 }, delta_time);
+	//DrawFpsIndicator({ 10, DXE_WINDOW_HEIGHT - 10, 0 }, delta_time);
 
 	/*SetFontSize(20);
 	DrawDefaultLightGuiController();*/

@@ -49,9 +49,12 @@ public:
 		MOVE_FLOOR2
 	};
 private:
+	//リザルトシーンの処理
+	void ResultSceneProcess(float delta_time);
+	
 	//カメラの初期値
 	tnl::Vector3 FIRST_CAMERA_POS = { 0, 650, -500 };
-	//tnl::Vector3 FIRST_CAMERA_POS = { 0, 1500, -10 };
+	//tnl::Vector3 FIRST_CAMERA_POS = { -200, 300, -300 };
 	//1体目の敵の座標
 	const tnl::Vector3 FIRST_ENEMY1_POS = { 1200,0.1f,500 };
 	//2体目の敵の座標
@@ -61,21 +64,26 @@ private:
 	//敵1の初期向き
 	const int ENEMY1_ANGLE = 270;
 	//敵2と3の初期向き
-	const int ENEMY2_ANGLE = 180;
-	//白い背景の画像の透明度
+	const int ENEMY2_3_ANGLE = 180;
+	//黒い背景の画像の透明度
 	const int BACK_GFX_ALPHA = 125;
+	//リザルトシーンに入るまでの時間
+	const float RESULT_SCENE_CHANGE_COUNT = 0.4f;
 
 	//ゲームスタートのフラグ
 	bool start_ = false;
 	//リザルトを呼び出すフラグ
 	bool result_start_ = false;
 
-	//後ろの白い背景の画像パス
+	//後ろの黒い背景の画像パス
 	int back_gfx_;
 	//bgmの音楽パス
 	int bgm_snd_;
 	//ダメージの音楽パス
 	int damage_snd_;
+
+	//リザルトの経過時間
+	float elapsed_ = 0;
 
 
 	Shared<dxe::Camera> camera_ = nullptr;

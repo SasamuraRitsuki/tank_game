@@ -19,8 +19,8 @@ ScenePlay::ScenePlay() {
 
 	//“G‚Ì¶¬
 	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY1_POS, ENEMY1_ANGLE));
-	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY2_POS, ENEMY2_ANGLE));
-	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY3_POS, ENEMY2_ANGLE));
+	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY2_POS, ENEMY2_3_ANGLE));
+	enemy_.emplace_back(std::make_shared<Enemy>(FIRST_ENEMY3_POS, ENEMY2_3_ANGLE));
 
 	SetDefaultLightParameter("directional_light_parameter.bin");
 
@@ -31,7 +31,6 @@ ScenePlay::ScenePlay() {
 	skybox_->rot_ = tnl::Quaternion::RotationAxis({ 0, 1, 0 }, tnl::ToRadian(90));
 	
 	//‰æ‘œ‚ğ“Ç‚İ‚Ş
-	//back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/white.bmp");
 	back_gfx_ = ResourceManager::GetInstance()->loadGraph("graphics/black2.jpg");
 	//‰¹Šy‚ğ“Ç‚İ‚Ş
 	bgm_snd_ = ResourceManager::GetInstance()->loadSound("sound/bgm/battle_bgm.mp3");
@@ -47,6 +46,7 @@ ScenePlay::~ScenePlay() {
 }
 
 void ScenePlay::update(float delta_time) {
+
 
 	if (!finished_) {
 		tank_->update(delta_time);
@@ -67,15 +67,15 @@ void ScenePlay::update(float delta_time) {
 
 				//’e‚ª”½Ë’†‚Ì
 				if ((*enemy_it_)->bullet_it_->get()->bullet_reflection_) {
-					// ’e‚Æ“G‚Ì“–‚½‚è”»’è‚Ìˆ—
+					// ©‹@‚Ì’e‚Æ“G‚Ì“–‚½‚è”»’è‚Ìˆ—
 					if (tnl::IsIntersectAABB((*enemy_it_)->tank_pos_, (*enemy_it_)->tank_size_v, (*enemy_it_)->bullet_it_->get()->mesh_->pos_, (*enemy_it_)->bullet_it_->get()->bullet_size_v)) {
 
 						if ((*enemy_it_)->tank_hp_ > 0) {
+							(*enemy_it_)->damaged_moment_ = true;
 							(*enemy_it_)->tank_hp_--;
 							//Œø‰Ê‰¹
 							PlaySoundMem(damage_snd_, DX_PLAYTYPE_BACK);
 						}
-						(*enemy_it_)->hp_calc_ = true;
 						(*enemy_it_)->is_alive_bullet_ = true;
 					}
 				}
@@ -85,9 +85,6 @@ void ScenePlay::update(float delta_time) {
 			if (tnl::IsIntersectAABB((*enemy_it_)->tank_pos_, (*enemy_it_)->tank_size_v, tank_->tank_pos_, tank_->tank_size_v)) {
 				tank_->damaged_ = true;
 				tank_damged_ = true;
-				if (tank_->tank_hp_ > 0)
-					//Œø‰Ê‰¹
-					PlaySoundMem(damage_snd_, DX_PLAYTYPE_BACK);
 			}
 			if ((*enemy_it_)->dead_) {	//deadƒtƒ‰ƒO‚ÅÁ–Å
 				enemy_it_ = enemy_.erase(enemy_it_);
@@ -136,18 +133,9 @@ void ScenePlay::update(float delta_time) {
 
 	//ƒŠƒUƒ‹ƒg‚É”ò‚Ô
 	if (finished_ ) {
-		/*auto mgr = GM::GetInstance();
-			mgr->changeScene(std::make_shared<SceneResult>(cleared_));*/
 
-		//1“x‚¾‚¯s‚í‚ê‚éˆ—
-		if (!result_start_) {
-			result_start_ = true;
+		ResultSceneProcess(delta_time);
 
-			StopSoundMem(bgm_snd_);
-			result_ = std::make_shared<SceneResult>(cleared_);
-		}
-		//Œ‹‰Ê‰æ–Ê‚Ìupdate
-		result_->update(delta_time);
 	}
 
 }
@@ -166,15 +154,46 @@ void ScenePlay::draw() {
 
 	tank_->draw(camera_);
 
-	if (result_start_) {
+	//™X‚ÉˆÃ‚­‚È‚é
+	//if (finished_) {
+	//	if (elapsed_ * 10 <= BACK_GFX_ALPHA) {
+	//		SetDrawBlendMode(DX_BLENDMODE_ALPHA, elapsed_ * 10);
+	//	}
+	//	else
+	//		SetDrawBlendMode(DX_BLENDMODE_ALPHA, BACK_GFX_ALPHA);
+	//}
+
+	//Result‚Ì•`‰æˆ—
+	if (result_start_) {		
+
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, BACK_GFX_ALPHA);
-		//Œã‚ë‚Ì”’‚¢”–‚¢”wŒi
+		//Œã‚ë‚Ì•‚¢”–‚¢”wŒi
 		DrawExtendGraph(0, 0,
 			DXE_WINDOW_WIDTH, DXE_WINDOW_HEIGHT, back_gfx_, false);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		//Œ‹‰Ê‰æ–Ê‚Ìdraw
 		result_->draw();
 	}
+}
+
+void ScenePlay::ResultSceneProcess(float delta_time) {
+	if(elapsed_ <= BACK_GFX_ALPHA)
+		elapsed_ += delta_time;
+
+	if (elapsed_ >= RESULT_SCENE_CHANGE_COUNT) {
+		//1“x‚¾‚¯s‚í‚ê‚éˆ—
+		if (!result_start_) {
+			result_start_ = true;
+			//bgm‚ÌƒXƒgƒbƒv
+			StopSoundMem(bgm_snd_);
+			//Œ‹‰Ê‰æ–Ê‚Ì¶¬
+			result_ = std::make_shared<SceneResult>(cleared_);
+		}
+		//Œ‹‰Ê‰æ–Ê‚Ìupdate
+		result_->update(delta_time);
+
+	}
+
 }
 
 void ScenePlay::CollisionSet() {

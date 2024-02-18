@@ -10,11 +10,19 @@ SceneResult::SceneResult(bool cleared) {
 	//background_hdl_ = LoadGraph("graphics/back_ground.jpg");
 
 	cleared_ = cleared;
-	clear_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/game_clear.mp3");
 
-	if(cleared_)
+	//ゲームクリア時
+	if (cleared_) {
+		clear_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/game_clear.mp3");
 		//効果音
 		PlaySoundMem(clear_snd_, DX_PLAYTYPE_BACK);
+	}
+	//ゲームオーバー時
+	else {
+		failure_snd_ = ResourceManager::GetInstance()->loadSound("sound/se/enemy_dead.mp3");
+		//効果音
+		PlaySoundMem(failure_snd_, DX_PLAYTYPE_BACK);
+	}
 }
 
 SceneResult::~SceneResult() {
